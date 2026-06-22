@@ -11,7 +11,9 @@
     "dev:react": "vite",
     "dev:electron": "wait-on tcp:5173 && tsc -p electron/tsconfig.json && node -e \"require('fs').writeFileSync('dist-electron/package.json', JSON.stringify({type: 'commonjs'}))\" && cross-env NODE_ENV=development electron .",
     "build:backend": "cd ../backend && venv\\Scripts\\python -m PyInstaller --noconfirm build.spec && cd ../frontend",
-    "build": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\" && npm run build:backend && tsc -b && vite build && tsc -p electron/tsconfig.json && node -e \"require('fs').writeFileSync('dist-electron/package.json', JSON.stringify({type: 'commonjs'}))\" && electron-builder",
+    "build:electron": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\" && npm run build:backend && tsc -b && vite build && tsc -p electron/tsconfig.json && node -e \"require('fs').writeFileSync('dist-electron/package.json', JSON.stringify({type: 'commonjs'}))\" && electron-builder",
+    "build:react": "vite build",
+    "build": "npm run build:electron",
     "lint": "eslint .",
     "preview": "vite preview"
   },
