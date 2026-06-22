@@ -82,7 +82,7 @@ We welcome contributions! The instructions below are specifically tailored for W
 ### Build from Source
 ```powershell
 # 1. Clone Repository
-git clone [https://github.com/YOUR_USERNAME/Cracked-Oura.git](https://github.com/YOUR_USERNAME/Cracked-Oura.git)
+git clone [https://github.com/TRXAlpha/Cracked-Oura.git](https://github.com/TRXAlpha/Cracked-Oura.git)
 cd Cracked-Oura
 
 # 2. Setup Backend (PowerShell)
