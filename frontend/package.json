@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:react\" \"npm run dev:electron\"",
     "dev:react": "vite",
-    "dev:electron": "wait-on tcp:5173 && tsc -p electron/tsconfig.json && echo '{\"type\":\"commonjs\"}' > dist-electron/package.json && NODE_ENV=development electron .",
-    "build:backend": "cd ../backend && ./venv/bin/python -m PyInstaller --noconfirm build.spec && cd ../frontend",
-    "build": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\" && npm run build:backend && tsc -b && vite build && tsc -p electron/tsconfig.json && echo '{\"type\":\"commonjs\"}' > dist-electron/package.json && electron-builder",
+    "dev:electron": "wait-on tcp:5173 && tsc -p electron/tsconfig.json && node -e \"require('fs').writeFileSync('dist-electron/package.json', JSON.stringify({type: 'commonjs'}))\" && cross-env NODE_ENV=development electron .",
+    "build:backend": "cd ../backend && venv\\Scripts\\python -m PyInstaller --noconfirm build.spec && cd ../frontend",
+    "build": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\" && npm run build:backend && tsc -b && vite build && tsc -p electron/tsconfig.json && node -e \"require('fs').writeFileSync('dist-electron/package.json', JSON.stringify({type: 'commonjs'}))\" && electron-builder",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -77,6 +77,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "electron": "^39.2.7",
     "electron-builder": "^26.0.12",
     "eslint": "^9.39.1",
