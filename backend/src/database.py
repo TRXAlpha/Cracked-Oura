@@ -15,16 +15,29 @@ import traceback
 # --- Configuration ---
 
 try:
-    # Use user data directory for database
-    BASE_DIR = get_user_data_dir()
-    DB_PATH = os.path.join(BASE_DIR, "oura_database.db")
-    DATABASE_URL = f"sqlite:///{DB_PATH}"
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./oura.db")
 
-    # Verify we can write to this directory
-    test_file = os.path.join(BASE_DIR, "write_test.tmp")
-    with open(test_file, "w", encoding="utf-8") as f:
-        f.write("test")
-    os.remove(test_file)
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    DB_PATH = None
+    if "sqlite" in DATABASE_URL:
+        if DATABASE_URL.startswith("sqlite:///./"):
+            BASE_DIR = get_user_data_dir()
+            DB_PATH = os.path.join(BASE_DIR, "oura_database.db")
+            DATABASE_URL = f"sqlite:///{DB_PATH}"
+        elif DATABASE_URL.startswith("sqlite:///"):
+            DB_PATH = DATABASE_URL.replace("sqlite:///", "", 1)
+            BASE_DIR = os.path.dirname(DB_PATH)
+        else:
+            BASE_DIR = "."
+            DB_PATH = DATABASE_URL
+
+        # Verify we can write to this directory
+        test_file = os.path.join(BASE_DIR, "write_test.tmp")
+        with open(test_file, "w", encoding="utf-8") as f:
+            f.write("test")
+        os.remove(test_file)
 
 except Exception as e:
     # CRITICAL: Write crash report to Documents
@@ -38,7 +51,14 @@ except Exception as e:
 
 # Create the SQLAlchemy engine
 # echo=False disables raw SQL logging to keep console output clean
-engine = create_engine(DATABASE_URL, echo=False)
+if "sqlite" in DATABASE_URL:
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=False,
+    )
+else:
+    engine = create_engine(DATABASE_URL, echo=False)
 
 # Session factory for creating new database sessions
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -52,7 +72,7 @@ def init_db():
     """
     try:
         Base.metadata.create_all(bind=engine)
-        logger.info(f"Database initialized at {DB_PATH}")
+        logger.info(f"Database initialized at {DB_PATH or DATABASE_URL}")
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
         raise e

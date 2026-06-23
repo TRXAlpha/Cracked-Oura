@@ -99,3 +99,30 @@ npm install --legacy-peer-deps
 
 # 4. Start Development Server
 npm run dev
+```
+
+## 🌐 Cloud & Web Deployment (Optional)
+
+You can run Cracked Oura as a cloud/web stack while still keeping desktop support in this same repository.
+
+1. **Deploy the database to Supabase**
+   - Create a Supabase project.
+   - Copy the PostgreSQL connection string from Supabase.
+   - Set it as `DATABASE_URL` in your backend hosting environment.
+
+2. **Deploy the backend to Render**
+   - Create a new Render Web Service connected to this repository.
+   - Set the start command to:
+     - `uvicorn main:app --host 0.0.0.0 --port 10000`
+   - Add required environment variables (including `DATABASE_URL`).
+
+3. **Deploy the frontend to Vercel**
+   - Import the frontend project into Vercel.
+   - Set the build command to:
+     - `npm run build:react`
+   - Set the output directory to `dist`.
+   - Add `VITE_API_URL` in Vercel Environment Variables so the frontend points to your deployed backend URL.
+
+4. **Verify end-to-end connectivity**
+   - Confirm the frontend can call the backend through `VITE_API_URL`.
+   - Confirm backend routes can read/write data using Supabase PostgreSQL.
