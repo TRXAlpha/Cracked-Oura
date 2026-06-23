@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: my-migrated-service
+    env: docker # This changes the language environment to Docker
+    repo: https://github.com
+    branch: main
