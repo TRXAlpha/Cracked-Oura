@@ -5,7 +5,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy the requirements file and install Python packages
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright, Chromium, and all OS-level dependencies (running as root)
@@ -13,7 +13,7 @@ RUN playwright install chromium
 RUN playwright install-deps chromium
 
 # Copy the rest of your backend files into the container
-COPY . .
+COPY backend/ .
 
 # Set the Python path so it can find your src folder
 ENV PYTHONPATH="/app"
