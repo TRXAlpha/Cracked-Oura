@@ -5,6 +5,7 @@ from playwright.async_api import async_playwright, expect, Page, BrowserContext,
 from typing import Optional, Dict, Any, Union
 
 from .config import config_manager
+from .core.scraper import ScraperProvider, ScraperException
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -53,28 +54,34 @@ class OuraAutomator:
             self.email = config.get("email")
             self.password = config.get("password")
 
-        logger.info(f"Initializing Playwright (Headless: {headless})")
+        logger.info(f"Initializing Playwright via ScraperProvider")
         self.playwright = await async_playwright().start()
-        
-        try:
-            self.browser = await self.playwright.chromium.launch(headless=headless, args=["--start-maximized"])
-        except Exception as e:
-            logger.error(f"Failed to launch browser: {e}")
-            logger.info("Retrying installation...")
-            await self._ensure_browser_installed(force=True)
-            self.browser = await self.playwright.chromium.launch(headless=headless, args=["--start-maximized"])
         
         # Load session if exists
         state = self.storage_state_path if os.path.exists(self.storage_state_path) else None
         if state:
             logger.info(f"Loading session from {state}")
             
-        self.context = await self.browser.new_context(
-            viewport={"width": 1920, "height": 1080},
-            storage_state=state
-        )
+        try:
+            self.context = await ScraperProvider.get_context(
+                self.playwright,
+                storage_state=state,
+                viewport={"width": 1920, "height": 1080}
+            )
+            # Retain a reference to browser to keep backward compatibility
+            self.browser = self.context.browser
+        except Exception as e:
+            logger.error(f"Failed to launch browser: {e}")
+            logger.info("Retrying installation...")
+            await self._ensure_browser_installed(force=True)
+            self.context = await ScraperProvider.get_context(
+                self.playwright,
+                storage_state=state,
+                viewport={"width": 1920, "height": 1080}
+            )
+            self.browser = self.context.browser
             
-        self.page = await self.context.new_page()
+        self.page = await ScraperProvider.create_page(self.context)
         self._is_initialized = True
 
     async def _ensure_browser_installed(self, force=False):

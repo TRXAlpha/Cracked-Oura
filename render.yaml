@@ -1,6 +1,18 @@
 services:
   - type: web
-    name: my-migrated-service
-    env: docker # This changes the language environment to Docker
-    repo: https://github.com
-    branch: main
+    name: cracked-oura-api
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    envVars:
+      - key: ENV
+        value: CLOUD_PROD
+      - key: DATABASE_URL
+        sync: false
+      - key: PROXY_URL
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: sqlite-data
+      mountPath: /var/data
+      sizeGB: 1
