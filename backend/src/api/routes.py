@@ -15,7 +15,8 @@ from sqlalchemy import select, func
 
 # Constants and Configuration
 from ..config import config_manager
-from ..database import get_db, SessionLocal
+from ..core.database import get_db, db_provider
+SessionLocal = db_provider.SessionLocal
 from ..models import (
     Sleep, Activity, Readiness, Resilience, SleepSession, Workout, Meditation, 
     RingBattery, HeartRate, Temperature, RingConfiguration, Tag, CardiovascularAge

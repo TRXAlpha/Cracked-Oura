@@ -1,14 +1,14 @@
 from fastapi import FastAPI, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from backend.src.api.routes import router
-from backend.src.database import init_db
+from backend.src.core.database import db_provider
 
 import asyncio
 import logging
 from datetime import datetime, timedelta
 from backend.src.automation import automator
 from backend.src.ingestion import OuraParser
-from backend.src.database import SessionLocal
+# SessionLocal will be accessed via db_provider.SessionLocal
 from backend.src.config import config_manager
 import os
 from pydantic import BaseModel
@@ -36,8 +36,7 @@ logger.info(f"API Starting... Logging to {log_file}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    init_db()
+    # Startup (Database is initialized automatically on import of db_provider)
     
     # Reset status on startup in case it was stuck
     cfg = config_manager.get_config()
@@ -313,7 +312,7 @@ async def process_ingestion(zip_path):
     
     # Ingest
     config_manager.update_status("Ingesting...")
-    db = SessionLocal()
+    db = db_provider.SessionLocal()
     try:
         parser = OuraParser(db)
         parser.parse_zip(zip_path)
